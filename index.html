@@ -4,10 +4,93 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NASA</title>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
+<header class="cabecera">
+    <div class="contenedor">
+      <p class="cabecera__marca">
+        <span class="cabecera__luna" aria-hidden="true"></span>
+        Explorador APOD
+      </p>
+      <h1 class="cabecera__titulo">Una ventana al universo, cada día</h1>
+      <p class="cabecera__texto">Mira la foto astronómica que la NASA publica hoy o viaja a cualquier fecha desde el 16 de junio de 1995.</p>
+    </div>
+  </header>
 
+  <main class="contenedor">
+
+    <!-- Buscador -->
+    <section class="buscador" aria-labelledby="titulo-buscador">
+      <h2 id="titulo-buscador" class="buscador__titulo">Buscar por fecha</h2>
+      <form id="form-buscador" class="buscador__form" novalidate>
+        <div class="buscador__campo">
+          <label for="input-fecha">Elige un día</label>
+          <input type="date" id="input-fecha" name="fecha" min="1995-06-16">
+        </div>
+        <button type="submit" id="btn-buscar" class="boton boton--primario">Buscar</button>
+      </form>
+      <div class="buscador__nav">
+        <button type="button" id="btn-anterior" class="boton boton--suave">◀ Día anterior</button>
+        <button type="button" id="btn-siguiente" class="boton boton--suave">Día siguiente ▶</button>
+      </div>
+    </section>
+
+    <!-- Mensajes: carga, errores y avisos -->
+    <div class="mensajes" aria-live="polite">
+      <p id="cargando" class="mensaje mensaje--carga" hidden>Cargando…</p>
+      <p id="mensaje-error" class="mensaje mensaje--error" role="alert" hidden></p>
+      <p id="mensaje-info" class="mensaje mensaje--info" hidden></p>
+    </div>
+
+    <div class="distribucion">
+
+      <!-- Foto principal -->
+      <article id="apod" class="apod" aria-labelledby="apod-titulo">
+        <figure class="apod__marco">
+          <img id="apod-imagen" class="apod__imagen" src="" alt="">
+        </figure>
+
+        <div class="apod__cuerpo">
+          <p id="apod-fecha" class="apod__fecha"></p>
+          <h2 id="apod-titulo" class="apod__titulo">Título de la foto</h2>
+
+          <div class="apod__acciones">
+            <button type="button" id="btn-favorito" class="boton boton--primario">⭐ Guardar en favoritos</button>
+            <a id="apod-video" class="boton boton--borde" href="#" target="_blank" rel="noopener" hidden>Ver el video en NASA</a>
+          </div>
+
+          <div id="apod-explicacion" class="apod__explicacion"></div>
+        </div>
+      </article>
+
+      <!-- Favoritos -->
+      <aside class="favoritos" aria-labelledby="titulo-favoritos">
+        <h2 id="titulo-favoritos" class="favoritos__titulo">Mis favoritas</h2>
+        <p id="favoritos-vacio" class="favoritos__vacio">Aún no guardas ninguna. Cuando veas una foto que te guste, presiona «Guardar en favoritos».</p>
+
+        <!--
+          JS crea aquí los items con esta estructura:
+          <li class="favorito">
+            <button type="button" class="favorito__abrir" data-fecha="2024-03-15">
+              <span class="favorito__fecha">15 de marzo de 2024</span>
+              <span class="favorito__nombre">Título</span>
+            </button>
+            <button type="button" class="favorito__eliminar" aria-label="Eliminar de favoritos">✕</button>
+          </li>
+        -->
+        <ul id="lista-favoritos" class="favoritos__lista"></ul>
+      </aside>
+
+    </div>
+  </main>
+
+  <footer class="pie">
+    <div class="contenedor">
+      <p>Datos e imágenes de la NASA · Astronomy Picture of the Day</p>
+    </div>
+  </footer>
 
 <script src="node_modules/dayjs/dayjs.min.js"></script>
 <script src="node_modules/dayjs/locale/es.js"></script>
