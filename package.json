@@ -1,0 +1,24 @@
+{
+  "name": "lab-using-npm-nasa",
+  "version": "1.0.0",
+  "description": "Integrantes\r - Leo Gonzales\r - Luisa Fernanda Sanchez\r - Kevin Alejandro Patiño\r - Juan Camilo Bohorquez\r - Diana Dimate",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JuanCamiloB777/LAB-Using-NPM-NASA.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/JuanCamiloB777/LAB-Using-NPM-NASA/issues"
+  },
+  "homepage": "https://github.com/JuanCamiloB777/LAB-Using-NPM-NASA#readme",
+  "dependencies": {
+    "dayjs": "^1.11.23"
+  }
+}
