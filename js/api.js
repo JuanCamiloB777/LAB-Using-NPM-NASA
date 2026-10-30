@@ -1,6 +1,5 @@
 const BASE_URL = 'https://science.nasa.gov/wp-json/wp/v2/apod-basic';
 
-
 export async function obtenerFotografia(fecha) {
   try {
     let url = '';
@@ -12,7 +11,8 @@ export async function obtenerFotografia(fecha) {
     }
 
     const respuesta = await fetch(url);
-    if (respuesta.ok === false) {
+
+    if (!respuesta.ok) {
       throw new Error('No se encontró la fotografía para la fecha consultada.');
     }
 
@@ -36,12 +36,20 @@ export function mostrarFotografia(datos) {
   const fecha = document.getElementById('apod-fecha');
   const explicacion = document.getElementById('apod-explicacion');
 
-  if (titulo) titulo.textContent = datos.title;
-  if (fecha) fecha.textContent = datos.date;
-  if (explicacion) explicacion.textContent = datos.explanation;
-  
+  if (titulo) {
+    titulo.textContent = datos.title;
+  }
+
+  if (fecha) {
+    fecha.textContent = datos.date;
+  }
+
+  if (explicacion) {
+    explicacion.innerHTML = datos.explanation;
+  }
+
   if (imagen) {
-    imagen.src = datos.url;
+    imagen.src = datos.hdurl || datos.url;
     imagen.alt = datos.title;
   }
 }
