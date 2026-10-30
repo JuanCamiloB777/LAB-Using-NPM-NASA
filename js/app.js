@@ -2,6 +2,7 @@ import { obtenerFotografia, mostrarFotografia } from "./api.js";
 
 dayjs.locale("es");
 
+// Elementos del buscador
 const formularioBuscador = document.getElementById("form-buscador");
 const inputFecha = document.getElementById("input-fecha");
 const btnAnterior = document.getElementById("btn-anterior");
@@ -10,11 +11,46 @@ const mensajeError = document.getElementById("mensaje-error");
 const mensajeInfo = document.getElementById("mensaje-info");
 const cargando = document.getElementById("cargando");
 
+// APOD que se está mostrando
+let apodActual = null;
+
+// Fechas permitidas
 const fechaMinima = "1995-06-16";
 const fechaHoy = dayjs().format("YYYY-MM-DD");
 
+inputFecha.min = fechaMinima;
 inputFecha.max = fechaHoy;
 
+// Cargar una fotografía
+async function cargarApod(fecha) {
+    mensajeError.hidden = true;
+    mensajeInfo.hidden = true;
+    cargando.hidden = false;
+
+    try {
+        const datos = await obtenerFotografia(fecha);
+
+        apodActual = datos;
+        mostrarFotografia(datos);
+
+        return true;
+
+    } catch (error) {
+        console.error("Error al consultar NASA:", error);
+
+        mensajeError.textContent =
+            "No fue posible conectar con NASA o encontrar la fotografía. Inténtalo nuevamente.";
+
+        mensajeError.hidden = false;
+
+        return false;
+
+    } finally {
+        cargando.hidden = true;
+    }
+}
+
+// Buscar fotografía por fecha
 formularioBuscador.addEventListener("submit", async function (evento) {
     evento.preventDefault();
 
@@ -30,7 +66,8 @@ formularioBuscador.addEventListener("submit", async function (evento) {
     }
 
     if (dayjs(fechaSeleccionada).isBefore(dayjs(fechaMinima), "day")) {
-        mensajeError.textContent = "La fecha debe ser desde el 16 de junio de 1995.";
+        mensajeError.textContent =
+            "La fecha debe ser desde el 16 de junio de 1995.";
         mensajeError.hidden = false;
         return;
     }
@@ -43,26 +80,18 @@ formularioBuscador.addEventListener("submit", async function (evento) {
 
     const fechaAPI = dayjs(fechaSeleccionada).format("YYMMDD");
 
-    try {
-        cargando.hidden = false;
+    const cargada = await cargarApod(fechaAPI);
 
-        const datos = await obtenerFotografia(fechaAPI);
-        console.log("Datos recibidos de la NASA:", datos);
-        mostrarFotografia(datos);
+    if (cargada) {
         mensajeInfo.textContent = "Fotografía cargada correctamente.";
         mensajeInfo.hidden = false;
-
-    } catch (error) {
-        console.error("Error al consultar NASA:", error);
-        mensajeError.textContent = "No fue posible conectar con NASA. Verifica tu conexión e inténtalo nuevamente.";
-        mensajeError.hidden = false;
-
-    } finally {
-        cargando.hidden = true;
     }
 });
+
+// Consultar día anterior
 btnAnterior.addEventListener("click", function () {
     const fechaActual = inputFecha.value;
+
     mensajeError.hidden = true;
     mensajeInfo.hidden = true;
 
@@ -75,7 +104,8 @@ btnAnterior.addEventListener("click", function () {
     const fechaAnterior = dayjs(fechaActual).subtract(1, "day");
 
     if (fechaAnterior.isBefore(dayjs(fechaMinima), "day")) {
-        mensajeError.textContent = "No hay fechas anteriores al 16 de junio de 1995.";
+        mensajeError.textContent =
+            "No hay fechas anteriores al 16 de junio de 1995.";
         mensajeError.hidden = false;
         return;
     }
@@ -83,8 +113,11 @@ btnAnterior.addEventListener("click", function () {
     inputFecha.value = fechaAnterior.format("YYYY-MM-DD");
     formularioBuscador.requestSubmit();
 });
+
+// Consultar día siguiente
 btnSiguiente.addEventListener("click", function () {
     const fechaActual = inputFecha.value;
+
     mensajeError.hidden = true;
     mensajeInfo.hidden = true;
 
@@ -105,3 +138,7 @@ btnSiguiente.addEventListener("click", function () {
     inputFecha.value = fechaSiguiente.format("YYYY-MM-DD");
     formularioBuscador.requestSubmit();
 });
+
+// Cargar la fotografía del día al abrir la página
+inputFecha.value = fechaHoy;
+cargarApod();
