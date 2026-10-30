@@ -13,13 +13,12 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/JuanCamiloB777/LAB-Using-NPM-NASA/issues"
   },
   "homepage": "https://github.com/JuanCamiloB777/LAB-Using-NPM-NASA#readme",
   "dependencies": {
     "dayjs": "^1.11.23"
-  },
-  "devDependencies": {}
+  }
 }

@@ -1,79 +1,144 @@
+import { obtenerFotografia, mostrarFotografia } from "./api.js";
+
 dayjs.locale("es");
 
-// Sin el ?per_page=1: lo agrega solo la petición de "hoy"
-const BASE_URL = "https://science.nasa.gov/wp-json/wp/v2/apod-basic";
+// Elementos del buscador
+const formularioBuscador = document.getElementById("form-buscador");
+const inputFecha = document.getElementById("input-fecha");
+const btnAnterior = document.getElementById("btn-anterior");
+const btnSiguiente = document.getElementById("btn-siguiente");
+const mensajeError = document.getElementById("mensaje-error");
+const mensajeInfo = document.getElementById("mensaje-info");
+const cargando = document.getElementById("cargando");
 
-// APOD que se está mostrando (la usa el Integrante 4 para favoritos)
+// APOD que se está mostrando
 let apodActual = null;
 
-// Pide la APOD a la API.
-// fecha: texto AAMMDD (ej. "240315"). Si no se pasa, trae la de hoy.
-async function obtenerFotografia(fecha) {
-  let url;
+// Fechas permitidas
+const fechaMinima = "1995-06-16";
+const fechaHoy = dayjs().format("YYYY-MM-DD");
 
-  if (fecha) {
-    url = BASE_URL + "/" + fecha;
-  } else {
-    url = BASE_URL + "?per_page=1";
-  }
+inputFecha.min = fechaMinima;
+inputFecha.max = fechaHoy;
 
-  const respuesta = await fetch(url);
-  if (!respuesta.ok) {
-    throw new Error("No hay APOD para esa fecha");
-  }
-
-  const datos = await respuesta.json();
-
-  // Hoy devuelve un arreglo; una fecha devuelve un objeto
-  return fecha ? datos : datos[0];
-}
-
-// Pinta una APOD en pantalla
-function mostrarFotografia(apod) {
-  const titulo = document.getElementById("apod-titulo");
-  const fecha = document.getElementById("apod-fecha");
-  const imagen = document.getElementById("apod-imagen");
-  const explicacion = document.getElementById("apod-explicacion");
-  const permalink = document.getElementById("apod-permalink");
-  const enlaceVideo = document.getElementById("apod-video");
-
-  titulo.textContent = apod.title;
-  fecha.textContent = dayjs(apod.date).format("D [de] MMMM [de] YYYY");
-  imagen.src = apod.hdurl;
-  imagen.alt = apod.title;
-  explicacion.innerHTML = apod.explanation;
-  permalink.href = apod.permalink;
-
-  if (apod.media_type === "video") {
-    enlaceVideo.href = apod.permalink;
-    enlaceVideo.hidden = false;
-  } else {
-    enlaceVideo.hidden = true;
-  }
-
-  apodActual = apod;
-}
-
-// Función reutilizable: carga y muestra una APOD.
-// Uso: cargarApod()          -> la de hoy
-//      cargarApod("240315")  -> la del 15 de marzo de 2024
+// Cargar una fotografía
 async function cargarApod(fecha) {
-  const cargando = document.getElementById("cargando");
-  const mensajeError = document.getElementById("mensaje-error");
+    mensajeError.hidden = true;
+    mensajeInfo.hidden = true;
+    cargando.hidden = false;
 
-  cargando.hidden = false;
-  mensajeError.hidden = true;
+    try {
+        const datos = await obtenerFotografia(fecha);
 
-  try {
-    const apod = await obtenerFotografia(fecha);
-    mostrarFotografia(apod);
-  } catch (error) {
-    mensajeError.textContent = error.message;
-    mensajeError.hidden = false;
-  } finally {
-    cargando.hidden = true;
-  }
+        apodActual = datos;
+        mostrarFotografia(datos);
+
+        return true;
+
+    } catch (error) {
+        console.error("Error al consultar NASA:", error);
+
+        mensajeError.textContent =
+            "No fue posible conectar con NASA o encontrar la fotografía. Inténtalo nuevamente.";
+
+        mensajeError.hidden = false;
+
+        return false;
+
+    } finally {
+        cargando.hidden = true;
+    }
 }
 
-// Al abrir la página, carga la de hoy
+// Buscar fotografía por fecha
+formularioBuscador.addEventListener("submit", async function (evento) {
+    evento.preventDefault();
+
+    const fechaSeleccionada = inputFecha.value;
+
+    mensajeError.hidden = true;
+    mensajeInfo.hidden = true;
+
+    if (fechaSeleccionada === "") {
+        mensajeError.textContent = "Por favor, selecciona una fecha.";
+        mensajeError.hidden = false;
+        return;
+    }
+
+    if (dayjs(fechaSeleccionada).isBefore(dayjs(fechaMinima), "day")) {
+        mensajeError.textContent =
+            "La fecha debe ser desde el 16 de junio de 1995.";
+        mensajeError.hidden = false;
+        return;
+    }
+
+    if (dayjs(fechaSeleccionada).isAfter(dayjs(), "day")) {
+        mensajeError.textContent = "No puedes seleccionar una fecha futura.";
+        mensajeError.hidden = false;
+        return;
+    }
+
+    const fechaAPI = dayjs(fechaSeleccionada).format("YYMMDD");
+
+    const cargada = await cargarApod(fechaAPI);
+
+    if (cargada) {
+        mensajeInfo.textContent = "Fotografía cargada correctamente.";
+        mensajeInfo.hidden = false;
+    }
+});
+
+// Consultar día anterior
+btnAnterior.addEventListener("click", function () {
+    const fechaActual = inputFecha.value;
+
+    mensajeError.hidden = true;
+    mensajeInfo.hidden = true;
+
+    if (!fechaActual) {
+        mensajeError.textContent = "Primero selecciona una fecha.";
+        mensajeError.hidden = false;
+        return;
+    }
+
+    const fechaAnterior = dayjs(fechaActual).subtract(1, "day");
+
+    if (fechaAnterior.isBefore(dayjs(fechaMinima), "day")) {
+        mensajeError.textContent =
+            "No hay fechas anteriores al 16 de junio de 1995.";
+        mensajeError.hidden = false;
+        return;
+    }
+
+    inputFecha.value = fechaAnterior.format("YYYY-MM-DD");
+    formularioBuscador.requestSubmit();
+});
+
+// Consultar día siguiente
+btnSiguiente.addEventListener("click", function () {
+    const fechaActual = inputFecha.value;
+
+    mensajeError.hidden = true;
+    mensajeInfo.hidden = true;
+
+    if (!fechaActual) {
+        mensajeError.textContent = "Primero selecciona una fecha.";
+        mensajeError.hidden = false;
+        return;
+    }
+
+    const fechaSiguiente = dayjs(fechaActual).add(1, "day");
+
+    if (fechaSiguiente.isAfter(dayjs(), "day")) {
+        mensajeError.textContent = "No puedes consultar fechas futuras.";
+        mensajeError.hidden = false;
+        return;
+    }
+
+    inputFecha.value = fechaSiguiente.format("YYYY-MM-DD");
+    formularioBuscador.requestSubmit();
+});
+
+// Cargar la fotografía del día al abrir la página
+inputFecha.value = fechaHoy;
 cargarApod();
