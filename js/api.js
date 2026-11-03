@@ -1,6 +1,6 @@
-const BASE_URL = 'https://science.nasa.gov/wp-json/wp/v2/apod-basic';
 
 export async function obtenerFotografia(fecha) {
+    const BASE_URL = 'https://science.nasa.gov/wp-json/wp/v2/apod-basic';
     try {
         let url = '';
 

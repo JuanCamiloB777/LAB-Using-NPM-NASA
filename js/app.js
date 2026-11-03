@@ -1,6 +1,6 @@
+dayjs.locale("es");
 import { obtenerFotografia, mostrarFotografia } from "./api.js";
 
-dayjs.locale("es");
 
 // Elementos del buscador
 const formularioBuscador = document.getElementById("form-buscador");
